@@ -1,0 +1,63 @@
+---
+title: "Sentiment analysis"
+author: "Josephine (Aka the firebreather)"
+date: "May 2, 2018"
+output: html_document
+---
+
+
+#Welcome to the wonderful tale of the silver-scaled corrrelational dragon. We will follow the dragon as it embarks on an awesome new adventure! A sentiment analysis *insert scary music*
+We don't need to set WD due to us using github
+
+
+#Load in packages for our sentiment analysis.
+
+
+```{r setup, include=FALSE}
+library(tesseract) #This is for reading in the non-machinereadable PDFs - you need to download the danish part of it if using it yourself - code inserted below this chunk
+
+#Run this line to get the danish stuff
+danish <- tesseract("dan")
+```
+
+This is the code for getting the Danish part
+
+**Run this** to get the danish stuff.
+tesseract_download("dan")
+danish <- tesseract("dan")
+
+
+
+##Okay - the Dragon has come to a mountain.
+##Aka, let us load in one article and do a sentiment analysis *Insert screaming smiley*
+This mountain is an article from politiken. The dragon now tries to load in the article.
+
+
+```{r}
+A2 <- ocr("P_A1_fly_Y2011.pdf", engine = danish)
+
+#Try with JP
+A1 <- ocr("J_A1_fly_Y2013.pdf", engine = danish)
+
+A3 <- ocr("b_A1_fly_Y2011.pdf", engine = danish)
+
+
+write.csv(A1, "A1JP.txt")
+
+write.csv(A2, "A1P.txt")
+
+write.csv(A3, "A1B.txt")
+```
+
+
+Try with machine readable stuff
+
+```{r}
+
+library(tm)
+library(pdftools)
+
+text = pdf_text("p_A1_fly_Y2011.pdf")
+
+```
+
