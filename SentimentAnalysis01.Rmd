@@ -75,6 +75,37 @@ The fire breather has taken a decision. We will make two loops - one for machine
 
 We will start out with the non-machinreadable due to a special fondness for tesserect (or because that is what will kill my computer and take hours, days, or...)
 
+Below, we make a function for cleaning the text (Thanks Arnault for the inspiration for code).
+```{r}
+
+library(stringr)
+
+
+cleanText <- function(string){
+  # Make the text lowercase
+  temp = tolower(string)
+  
+  #Now let us remove everything starting with a backslash
+  #temb = stringr::str_replace_all(temp, "\\n", " ") #Just because this sortoff works
+  
+  #' Remove everything that is not a number or letter. 
+  #temp = stringr::str_replace_all(temp,"[^a-zA-Z\\s]", " ")
+  # Shrink down to just one white space
+  #temp <- stringr::str_replace_all(temp,"[\\s]+", " ")
+  # Split it
+  #temp <- stringr::str_split(temp, " ")[[1]]
+  # Get rid of trailing "" if necessary
+  #indexes <- which(temp == "")
+  #if(length(indexes) > 0){
+  #  temp <- temp[-indexes]
+  #} 
+  return(temp)
+}
+```
+
+
+And now for the loop
+
 ```{r}
 library(rlist) #list.flatten
 
@@ -88,14 +119,15 @@ nmArticles = list.files(path = "C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverSc
 #We can opeeeeeen the loooop! (Sing this in the same melody as "I can shoow you the woooorld!")
 
 
+
 for (article in nmArticles){
   print (article) # just to be able to follow the code, see that it is working and stuff
   
-  #So, right now we have the article name, but it is in subfolders. But we can solve this! 
-  arDir = paste("data/NonMachineRead/", article, sep ="") #Article directory
+  #Set temporary WD
+  setwd("C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/NonMachineRead")
   
   #Okay, now we are ready to read in the article
-  A <- ocr(arDir, engine = danish)
+  A <- ocr(article, engine = danish)
   
   #Okay, so our awesome function from the tesserect package helped us read the non machinable text.
   #However, we are now left with a character string. This is the same length as number of pages in the pdf - And we just want one long coherrent text
@@ -108,7 +140,8 @@ for (article in nmArticles){
   }
   
   #So, the loop above solved our problem - now we have the coherrent string
-  #Cool, now because we have the non machinable PDFs
+  #Cool. Now we want to clean the text
+  cleanA = cleanText(AOut)
   
   
 }
