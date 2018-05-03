@@ -29,35 +29,94 @@ danish <- tesseract("dan")
 
 
 ##Okay - the Dragon has come to a mountain.
-##Aka, let us load in one article and do a sentiment analysis *Insert screaming smiley*
+##Aka, let us load in one article *Insert screaming smiley*
 This mountain is an article from politiken. The dragon now tries to load in the article.
 
 
 ```{r}
-A2 <- ocr("P_A1_fly_Y2011.pdf", engine = danish)
+
+#All this is commented out to save time - do you ever just run the entire code and regret it?
+#A2 <- ocr("P_A1_fly_Y2011.pdf", engine = danish)
 
 #Try with JP
-A1 <- ocr("J_A1_fly_Y2013.pdf", engine = danish)
+#A1 <- ocr("J_A1_fly_Y2013.pdf", engine = danish)
 
-A3 <- ocr("b_A1_fly_Y2011.pdf", engine = danish)
+#A3 <- ocr("b_A1_fly_Y2011.pdf", engine = danish)
 
 
-write.csv(A1, "A1JP.txt")
+#write.csv(A1, "A1JP.txt")
 
-write.csv(A2, "A1P.txt")
+#write.csv(A2, "A1P.txt")
 
-write.csv(A3, "A1B.txt")
+#write.csv(A3, "A1B.txt")
 ```
 
 
 Try with machine readable stuff
 
 ```{r}
+#Same reason for commenting out as above
 
-library(tm)
-library(pdftools)
+#library(tm)
+#library(pdftools)
 
-text = pdf_text("p_A1_fly_Y2011.pdf")
+#text = pdf_text("p_A1_fly_Y2011.pdf")
 
 ```
+
+
+
+The dragon conquered the first mountain (actually it was just a small hill, called Himmelbjerget - but also a different hill - just for the fun of it).
+Now it has come to a lot of hills that it needs to conquor in a systematic way, if it wants to live *Dam, dam, dam, daaaaam*
+
+##The tale of the dragon and the systematic loop for reading PDF files
+
+The fire breather has taken a decision. We will make two loops - one for machine-readable stuff using pdf_text and one for non-machine readable stuff using tesseract.
+
+We will start out with the non-machinreadable due to a special fondness for tesserect (or because that is what will kill my computer and take hours, days, or...)
+
+```{r}
+library(rlist) #list.flatten
+
+
+#Make a list of all the articles that are non-machinable (I have a folder - Because I'm cool!) (New word - yay! :D)
+
+nmArticles = list.files(path = "C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/NonMachineRead")
+
+
+
+#We can opeeeeeen the loooop! (Sing this in the same melody as "I can shoow you the woooorld!")
+
+
+for (article in nmArticles){
+  print (article) # just to be able to follow the code, see that it is working and stuff
+  
+  #So, right now we have the article name, but it is in subfolders. But we can solve this! 
+  arDir = paste("data/NonMachineRead/", article, sep ="") #Article directory
+  
+  #Okay, now we are ready to read in the article
+  A <- ocr(arDir, engine = danish)
+  
+  #Okay, so our awesome function from the tesserect package helped us read the non machinable text.
+  #However, we are now left with a character string. This is the same length as number of pages in the pdf - And we just want one long coherrent text
+  #Is there an easier way to do this? Unlist did not work...
+  AOut = NULL
+  for (page in A){
+    print(page)
+    
+    AOut = paste(AOut, page, article, sep ="")
+  }
+  
+  #So, the loop above solved our problem - now we have the coherrent string
+  #Cool, now because we have the non machinable PDFs
+  
+  
+}
+
+
+
+```
+
+
+
 
