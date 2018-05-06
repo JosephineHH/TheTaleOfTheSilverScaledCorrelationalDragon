@@ -82,6 +82,8 @@ library(stringr)
 
 
 cleanText <- function(string){
+  #Set temporary WD
+  setwd("C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/NonMachineRead")
   # Make the text lowercase
   temp = tolower(string)
   
@@ -120,12 +122,70 @@ cleanText <- function(string){
 
 And now we make a function for the sentiment analysis
 ```{r}
+#We need to set WD, for some stupid reason
+setwd("C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon")
+#RUN THIS LINE, hope it allows stupid danish letters
+
+#Read in the Afinn library
+afinn = read.csv("afinn.csv", header = F, encoding = "UTF-8")
+
+afinn$V1 = as.character(afinn$V1)
+
+#Okay, this works now, but fucks up the first word. Let us just change that quickly
+afinn[1,1] = "abekat"
+
+#And then rename the column names
+colnames(afinn)[1] <- "word"
+colnames(afinn)[2] <- "sentiment"
+
+
 sentimentAnalysis <- function(string){
   
-  temp = string
+  #okay, we start out by making our article string into a temporary dataframe
+  tempDF = as.data.frame(string)
+  
+  #Now we change the name of one of our columns (the column for our words in the article is right now called string - that doesn't work!)
+  colnames(tempDF) <- "word"
+  #We don't want the word column to be a factor. So we change it. #BE THE CHANGE YOU WANT TO SEE IN THE WORLD!
+  tempDF$word = as.character(tempDF$word)
   
   
-  return(temp)
+  #Okay, so now I guess we are ready to try analysing shit - And get some information from ou file name
+  #First up: Newspaper
+  tempDF$newspaper = substring(article, 1, 1)
+  
+  #Okay, now article
+  tempDF$article = sub("A", "", unlist(strsplit(article, "_"))[2])
+  
+  #Okay, now year! YEAH!
+  tempDF$year = sub(".pdf", "", sub("Y", "", unlist(strsplit(article, "_"))[4]))
+  
+  #And search term!
+  tempDF$searchTerm = unlist(strsplit(article, "_"))[3]
+  
+  #And now for sentiment!
+  #I guess a good way to start is by adding column names for whatever we want to get out of the analysis (and make the columns empty)
+  
+  
+  #Okay, I guess we are writing a loop! I miss loops. Do you miss them too? <3 
+  #But I guess we justed swapped long loops for longer functions..
+  
+  #Okay, so we have the tempDF and the afinn df and now we merge them using what is apparently a left outer join
+  tempDF = dplyr::left_join(tempDF, afinn, by = "word")
+  
+  #Now add a column with arousal - Aka change sentiment to absolute values
+  tempDF$arousal = abs(tempDF$sentiment)
+  
+  #Now at a row for number of words in the article
+  tempDF$nWords = length(tempDF$word)
+  
+  #Now for number of words that actually gave os a score
+  tempDF$nWordsSentiment = sum(complete.cases(tempDF$sentiment))
+  
+  #And let us just calculate the percentage...
+  tempDF$percWordsSentiment = (sum(complete.cases(tempDF$sentiment))/length(tempDF$word))*100
+  
+ return(tempDF)
 }
 
 
@@ -136,8 +196,6 @@ sentimentAnalysis <- function(string){
 And now for the loop
 
 ```{r}
-library(rlist) #list.flatten
-
 
 #Make a list of all the articles that are non-machinable (I have a folder - Because I'm cool!) (New word - yay! :D)
 
@@ -147,10 +205,11 @@ nmArticles = list.files(path = "C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverSc
 
 #We can opeeeeeen the loooop! (Sing this in the same melody as "I can shoow you the woooorld!")
 
-
+N = 1
 
 for (article in nmArticles){
   print (article) # just to be able to follow the code, see that it is working and stuff
+  N = N+1
   
   #Set temporary WD
   setwd("C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/NonMachineRead")
@@ -163,8 +222,6 @@ for (article in nmArticles){
   #Is there an easier way to do this? Unlist did not work...
   AOut = NULL
   for (page in A){
-    print(page)
-    
     AOut = paste(AOut, page, article, sep ="")
   }
   
@@ -175,6 +232,20 @@ for (article in nmArticles){
   #okay, so now we can move onto the next step... OUR SENTIMENT ANALYSIS! 
   #Let us just write a function... I need to learn to do functions instead, to avoid the insanely long loops from last semester
   
+  #FUcntion is done! Good job, rainbow coloured dragon!
+  dfAnalysis = sentimentAnalysis(cleanA)
+  
+  
+  #And now we just need to write this to a csv-file!
+  #EASY!
+  
+  #first we specify our name.
+  #AKA, remove .pdf and swap it for .csv in our article name
+  saveName = sub(".pdf", ".csv", article)
+  
+  #Set temporary WD again (but to a different place)
+  setwd("C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/AnalysedFiles")
+  write.csv(dfAnalysis, file = saveName, row.names = F)
   
 }
 
