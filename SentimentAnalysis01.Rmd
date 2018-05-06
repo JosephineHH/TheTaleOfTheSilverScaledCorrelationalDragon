@@ -85,23 +85,52 @@ cleanText <- function(string){
   # Make the text lowercase
   temp = tolower(string)
   
-  #Now let us remove everything starting with a backslash
-  #temb = stringr::str_replace_all(temp, "\\n", " ") #Just because this sortoff works
+  #Now let us remove everything starting with a backslash _ Wuhuu, the code works now! :D
+  temp = stringr::str_replace_all(temp, "[[:cntrl:]]", " ")
   
-  #' Remove everything that is not a number or letter. 
-  #temp = stringr::str_replace_all(temp,"[^a-zA-Z\\s]", " ")
-  # Shrink down to just one white space
-  #temp <- stringr::str_replace_all(temp,"[\\s]+", " ")
-  # Split it
-  #temp <- stringr::str_split(temp, " ")[[1]]
-  # Get rid of trailing "" if necessary
-  #indexes <- which(temp == "")
-  #if(length(indexes) > 0){
-  #  temp <- temp[-indexes]
-  #} 
+  #Okay, now let us remove everything that is in the bottom infomedia-don't-share-this-article-thingy
+  temp = sub("alt materiale i infomedia.*", "", temp)
+  
+  #Okay, now it would be really cool if we could remove everything that starts with "https:" and ends with "infomedia" (everything in between this
+  temp = sub("https.*infomedia", "", temp)
+  
+  #Okay, next step - let us remove everything before "id:" ( and the thing in the space after the id)
+  #Best bet is to do like this (but might create issues if we have an article that include "id: " at some point, but we just can't do anything about this at the moment - assumption that this will be right
+  temp = sub(".*id: ",  "", temp)
+  
+    
+  #Okay, so now we just need to remove everything that is not letters or numbers.
+  #And unfortunately we cannot use Arnaults function and need to make our own
+  #I HATE DANISH!
+  #But the below works
+  temp = stringr::str_replace_all(temp, "\\W", " ") #\\W means all non-word characters - thus removes everything but letters and numbers
+  
+  #And now we need to remove every time we have double, triple or more spaces
+  #Shrink down to just one white space
+  temp <- stringr::str_replace_all(temp,"[\\s]+", " ")
+  
+  #okay, so now we need to remove the ID number. We now that the ID number is the first thinghy in our string. So now we split the string by space (which we needed to do at some point anyway, and then remove the first element)
+  temp = strsplit(temp, " ")[[1]]
+  #And now we remove the first thing in the streng
+  temp = temp[-1]
+
   return(temp)
 }
 ```
+
+And now we make a function for the sentiment analysis
+```{r}
+sentimentAnalysis <- function(string){
+  
+  temp = string
+  
+  
+  return(temp)
+}
+
+
+```
+
 
 
 And now for the loop
@@ -142,6 +171,9 @@ for (article in nmArticles){
   #So, the loop above solved our problem - now we have the coherrent string
   #Cool. Now we want to clean the text
   cleanA = cleanText(AOut)
+  
+  #okay, so now we can move onto the next step... OUR SENTIMENT ANALYSIS! 
+  #Let us just write a function... I need to learn to do functions instead, to avoid the insanely long loops from last semester
   
   
 }
