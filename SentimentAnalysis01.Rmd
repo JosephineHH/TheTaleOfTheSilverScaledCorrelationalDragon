@@ -209,6 +209,7 @@ N = 1
 
 for (article in nmArticles){
   print (article) # just to be able to follow the code, see that it is working and stuff
+  print (N)
   N = N+1
   
   #Set temporary WD
@@ -254,5 +255,125 @@ for (article in nmArticles){
 ```
 
 
+##Okay, so we beat down the non machinable files.
+###Now we move on to the machinable files.
+
+
+First we write a new cleaning function:
+```{r}
+
+library(stringr)
+
+
+cleanText <- function(string){
+  
+  # Make the text lowercase
+  temp = tolower(string)
+  
+  #Now let us remove everything starting with a backslash _ Wuhuu, the code works now! :D
+  temp = stringr::str_replace_all(temp, "[[:cntrl:]]", " ")
+    
+  #Okay, so now we just need to remove everything that is not letters or numbers.
+  #And unfortunately we cannot use Arnaults function and need to make our own
+  #I HATE DANISH!
+  #But the below works
+  temp = stringr::str_replace_all(temp, "\\W", " ") #\\W means all non-word characters - thus removes everything but letters and numbers
+  
+  #And now we need to remove every time we have double, triple or more spaces
+  #Shrink down to just one white space
+  temp <- stringr::str_replace_all(temp,"[\\s]+", " ")
+  
+  #okay, so now we need to remove the article-thinghy in the end. This is the two last thinghy in our string. So now we split the string by space (which we needed to do at some point anyway, and then remove the last two elements)
+  temp = strsplit(temp, " ")[[1]]
+  #And now we remove the first thing in the streng
+  temp = temp[-length(temp)]
+  temp = temp[-length(temp)]
+
+  return(temp)
+}
+
+```
+
+
+#And now we can run the loop
+
+```{r}
+mArticles = list.files(path = "C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/MachineRead")
+
+library(pdftools)
+
+N = 1
+for (article in mArticles){
+  print (article) # just to be able to follow the code, see that it is working and stuff
+  print (N)
+  N = N+1
+  
+  #Set temporary WD
+  setwd("C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/MachineRead")
+  
+  #Okay, now we are ready to read in the article
+  A <- pdf_text(article)
+  
+  #However, we are now left with a character string. This is the same length as number of pages in the pdf - And we just want one long coherrent text
+  #Is there an easier way to do this? Unlist did not work...
+  AOut = NULL
+  for (page in A){
+    AOut = paste(AOut, page, article, sep ="")
+  }
+  
+  #So, the loop above solved our problem - now we have the coherrent string
+  #Cool. Now we want to clean the text
+  cleanA = cleanText(AOut)
+  
+  #okay, so now we can move onto the next step... OUR SENTIMENT ANALYSIS! 
+  #Let us just write a function... I need to learn to do functions instead, to avoid the insanely long loops from last semester
+  
+  #FUcntion is done! Good job, rainbow coloured dragon!
+  dfAnalysis = sentimentAnalysis(cleanA)
+  
+  
+  #And now we just need to write this to a csv-file!
+  #EASY!
+  
+  #first we specify our name.
+  #AKA, remove .pdf and swap it for .csv in our article name
+  saveName = sub(".pdf", ".csv", article)
+  
+  #Set temporary WD again (but to a different place)
+  setwd("C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/AnalysedFiles/mr")
+  write.csv(dfAnalysis, file = saveName, row.names = F)
+  
+}
+
+
+
+```
+
+
+#Now we merge our 500 files to one file with an insane amount of rows
+```{r}
+N = 1
+
+#Get a list of all the csv files
+articles = list.files(path = "C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/AnalysedFiles")
+
+for (article in articles){
+  
+  #set temporary wd
+  setwd("C:/Users/hille/Desktop/Exam/TheTaleOfTheSilverScaledCorrelationalDragon/data/AnalysedFiles")
+  
+  A = read.csv(article)
+  
+  if (exists("sentiment") == F){
+    sentiment = A
+  }else {sentiment = rbind(sentiment, A)
+    print(c("RAINBOW UNICORN DRAGON", N))
+    N = N+1}
+  }
+
+#Now we save the big CSVfile
+write.csv(sentiment, file = "bigCSVOfSentiment.csv", row.names = F)
+
+```
 
 
